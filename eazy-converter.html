@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Eazy Converter - PNG to WebP</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #1a1d29;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(74, 222, 128, 0.08) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    /* Header Styles */
+    header {
+      background: rgba(26, 29, 41, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+      padding: 25px 40px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      position: relative;
+      z-index: 10;
+    }
+
+    header h1 {
+      text-align: center;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, #a78bfa 0%, #4ade80 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Main Content */
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .container {
+      max-width: 1000px;
+      width: 100%;
+      background: rgba(26, 29, 41, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 24px;
+      padding: 50px;
+      box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.4),
+        0 0 1px rgba(139, 92, 246, 0.3);
+      border: 1px solid rgba(139, 92, 246, 0.15);
+    }
+
+    h2 {
+      text-align: center;
+      color: #e5e7eb;
+      margin-bottom: 40px;
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    h2 i {
+      color: #a78bfa;
+      font-size: 24px;
+    }
+
+    #dropZone {
+      width: 100%;
+      padding: 80px 40px;
+      border: 2px dashed rgba(139, 92, 246, 0.4);
+      border-radius: 20px;
+      text-align: center;
+      margin-bottom: 50px;
+      cursor: pointer;
+      background: rgba(139, 92, 246, 0.03);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    #dropZone:hover {
+      border-color: rgba(139, 92, 246, 0.6);
+      background: rgba(139, 92, 246, 0.06);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(139, 92, 246, 0.15);
+    }
+
+    #dropZone i {
+      font-size: 56px;
+      color: #a78bfa;
+      margin-bottom: 20px;
+      display: block;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    #dropZone .drop-text {
+      font-size: 22px;
+      font-weight: 500;
+      color: #e5e7eb;
+      margin-bottom: 10px;
+    }
+
+    #dropZone .drop-subtext {
+      font-size: 15px;
+      color: #9ca3af;
+    }
+
+    /* File List Styles */
+    .file-list {
+      margin-top: 40px;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      padding: 18px 20px;
+      background: rgba(31, 34, 46, 0.6);
+      border: 1px solid rgba(139, 92, 246, 0.1);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      transition: all 0.3s ease;
+      gap: 15px;
+    }
+
+    .file-item:hover {
+      background: rgba(139, 92, 246, 0.05);
+      transform: translateX(3px);
+      border-color: rgba(139, 92, 246, 0.2);
+    }
+
+    .file-icon {
+      color: #a78bfa;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .file-name {
+      flex: 1;
+      color: #e5e7eb;
+      font-weight: 500;
+      font-size: 15px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .file-status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 40px;
+      flex-shrink: 0;
+    }
+
+    .file-status i {
+      font-size: 18px;
+      color: #9ca3af;
+    }
+
+    .file-actions {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .icon-btn {
+      cursor: pointer;
+      padding: 10px 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .download-icon-btn {
+      background: linear-gradient(135deg, #4ade80 0%, #86efac 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(74, 222, 128, 0.25);
+    }
+
+    .download-icon-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(74, 222, 128, 0.35);
+    }
+
+    .remove-icon-btn {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .remove-icon-btn:hover {
+      transform: translateY(-2px);
+      background: rgba(239, 68, 68, 0.25);
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    .action-btn {
+      cursor: pointer;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.25);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .action-btn i {
+      font-size: 14px;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.35);
+      background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%);
+    }
+
+    .action-btn:active {
+      transform: translateY(0);
+    }
+
+    .button-container {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      align-items: center;
+      margin-top: 50px;
+      flex-wrap: wrap;
+    }
+
+    #downloadAll {
+      display: none;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(139, 92, 246, 0.2);
+      border-top-color: #a78bfa;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Footer Styles */
+    footer {
+      background: rgba(26, 29, 41, 0.95);
+      backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(139, 92, 246, 0.15);
+      padding: 25px 40px;
+      text-align: center;
+      color: #6b7280;
+      font-size: 13px;
+      position: relative;
+      z-index: 10;
+      margin-top: auto;
+    }
+
+    footer a {
+      color: #a78bfa;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    footer a:hover {
+      color: #c4b5fd;
+    }
+
+    @media (max-width: 768px) {
+      header {
+        padding: 20px 20px;
+      }
+
+      header h1 {
+        font-size: 22px;
+      }
+
+      .container {
+        padding: 30px 20px;
+      }
+
+      h2 {
+        font-size: 20px;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      #dropZone {
+        padding: 60px 30px;
+      }
+
+      .file-item {
+        padding: 14px 16px;
+        gap: 10px;
+      }
+
+      .file-name {
+        font-size: 13px;
+      }
+
+      .file-icon {
+        font-size: 18px;
+      }
+
+      .file-status i {
+        font-size: 16px;
+      }
+
+      .icon-btn {
+        padding: 8px 10px;
+        font-size: 13px;
+      }
+
+      .action-btn {
+        padding: 10px 18px;
+        font-size: 13px;
+      }
+
+      .button-container {
+        gap: 12px;
+      }
+
+      footer {
+        padding: 20px;
+        font-size: 11px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>Ez Converter</h1>
+  </header>
+
+  <main>
+    <div class="container">
+      <h2>
+        <i class="fa-solid fa-images"></i>
+        PNG to WebP Converter
+      </h2>
+
+      <div id="dropZone">
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+        <div class="drop-text">Drag & Drop PNG files here</div>
+        <div class="drop-subtext">or click to browse from your device</div>
+      </div>
+      <input type="file" id="upload" accept="image/png" multiple style="display:none">
+
+      <div class="file-list" id="fileList"></div>
+
+      <div class="button-container">
+        <button id="convertAll" class="action-btn">
+          <i class="fa-solid fa-arrows-rotate"></i>
+          Convert All
+        </button>
+        <a id="downloadAll" class="action-btn">
+          <i class="fa-solid fa-download"></i>
+          Download All (ZIP)
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2024 All Rights Reserved. Created by <a href="#" target="_blank">James Rafael Boroy</a></p>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <script>
+    let files = [];
+    let converted = {};
+
+    const dropZone = document.getElementById("dropZone");
+    const uploadInput = document.getElementById("upload");
+    const fileList = document.getElementById("fileList");
+    const downloadAllBtn = document.getElementById("downloadAll");
+
+    dropZone.onclick = () => uploadInput.click();
+
+    uploadInput.onchange = (e) => addFiles(e.target.files);
+
+    dropZone.ondragover = (e) => {
+      e.preventDefault();
+      dropZone.style.borderColor = "rgba(139, 92, 246, 0.6)";
+      dropZone.style.background = "rgba(139, 92, 246, 0.08)";
+    };
+    dropZone.ondragleave = () => {
+      dropZone.style.borderColor = "rgba(139, 92, 246, 0.4)";
+      dropZone.style.background = "rgba(139, 92, 246, 0.03)";
+    };
+    dropZone.ondrop = (e) => {
+      e.preventDefault();
+      dropZone.style.borderColor = "rgba(139, 92, 246, 0.4)";
+      dropZone.style.background = "rgba(139, 92, 246, 0.03)";
+      addFiles(e.dataTransfer.files);
+    };
+
+    function addFiles(selectedFiles) {
+      for (const file of selectedFiles) {
+        if (file.type !== "image/png") continue;
+
+        files.push(file);
+        addFileRow(file, files.length - 1);
+      }
+    }
+
+    function addFileRow(file, index) {
+      const fileItem = document.createElement("div");
+      fileItem.className = "file-item";
+      fileItem.dataset.index = index;
+
+      fileItem.innerHTML = `
+        <i class="fa-solid fa-file-image file-icon"></i>
+        <div class="file-name">${file.name}</div>
+        <div class="file-status">
+          <i class="fa-regular fa-clock"></i>
+        </div>
+        <div class="file-actions">
+          <button class="icon-btn remove-icon-btn" onclick="removeFile(${index})">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+      `;
+
+      fileList.appendChild(fileItem);
+    }
+
+    function removeFile(index) {
+      files[index] = null;
+      const fileItem = fileList.querySelector(`[data-index="${index}"]`);
+      if (fileItem) fileItem.remove();
+    }
+
+    async function convertImage(file) {
+      const bitmap = await createImageBitmap(file);
+      const canvas = document.createElement("canvas");
+      canvas.width = bitmap.width;
+      canvas.height = bitmap.height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(bitmap, 0, 0);
+
+      return new Promise((resolve) => {
+        canvas.toBlob((blob) => {
+          const name = file.name.replace(/\.png$/i, ".webp");
+          resolve({ name, blob });
+        }, "image/webp", 0.9);
+      });
+    }
+
+    document.getElementById("convertAll").onclick = async () => {
+      if (files.filter(f => f).length === 0) {
+        alert("Please upload images first.");
+        return;
+      }
+
+      const zip = new JSZip();
+      let firstFileName = "";
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (!file) continue;
+
+        // Save first file name for ZIP naming
+        if (!firstFileName) {
+          firstFileName = file.name.replace(/\.png$/i, "");
+        }
+
+        const fileItem = fileList.querySelector(`[data-index="${i}"]`);
+        const statusDiv = fileItem.querySelector(".file-status");
+        statusDiv.innerHTML = '<i class="spinner"></i>';
+
+        const { name, blob } = await convertImage(file);
+        converted[i] = { name, blob };
+        zip.file(name, blob);
+
+        // Update with download button
+        const actionsDiv = fileItem.querySelector(".file-actions");
+        actionsDiv.innerHTML = `
+          <button class="icon-btn download-icon-btn" onclick="downloadSingle(${i})">
+            <i class="fa-solid fa-download"></i>
+          </button>
+          <button class="icon-btn remove-icon-btn" onclick="removeFile(${i})">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        `;
+
+        statusDiv.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #4ade80;"></i>';
+      }
+
+      zip.generateAsync({ type: "blob" }).then((content) => {
+        const zipURL = URL.createObjectURL(content);
+        downloadAllBtn.href = zipURL;
+        downloadAllBtn.download = `${firstFileName}_converted.zip`;
+        downloadAllBtn.style.display = "inline-flex";
+      });
+    };
+
+    function downloadSingle(index) {
+      const file = converted[index];
+      if (!file) return;
+
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(file.blob);
+      a.download = file.name;
+      a.click();
+    }
+  </script>
+
+</body>
+
+</html>
